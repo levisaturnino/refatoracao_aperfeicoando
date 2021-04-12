@@ -9,7 +9,6 @@ class PlayController {
 
     fun statement (invoice: Invoice, plays:List<IPlay>):String {
         var totalAmount = 0.0
-        var volumeCredits = 0.0
         var result = "Statement for ${invoice.customer}\n"
 
         for ((index, perf)  in invoice.performances?.withIndex()!!) {
@@ -21,16 +20,21 @@ class PlayController {
            totalAmount += amount(perf,playFor(index,plays))
         }
 
-        for ((index, perf)  in invoice.performances?.withIndex()!!) {
-            volumeCredits  = volumeCreditsFor(playFor(index,plays),perf)
-        }
+       // var volumeCredits = totalVolumeCredits(invoice,plays)
 
         result += "Amount owed is ${usd(totalAmount/100)}\n"
-        result += "You earned ${volumeCredits} credits\n"
+        result += "You earned ${totalVolumeCredits(invoice,plays)} credits\n"
 
         return result
     }
 
+    fun totalVolumeCredits(invoice: Invoice,plays: List<IPlay>):Double{
+        var volumeCredits = 0.0
+        for ((index, perf)  in invoice.performances?.withIndex()!!) {
+            volumeCredits  = volumeCreditsFor(playFor(index,plays),perf)
+        }
+       return volumeCredits
+    }
     fun volumeCreditsFor( play: IPlay, perf: Performance):Double{
 
         var result = 0.0
