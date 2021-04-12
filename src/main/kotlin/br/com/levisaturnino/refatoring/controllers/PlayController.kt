@@ -14,17 +14,18 @@ class PlayController {
 
         for ((index, perf)  in invoice.performances?.withIndex()!!) {
            // val play = playFor(index,plays)
-
-            var thisAmount = amount(perf,playFor(index,plays))
-
-            volumeCredits  = volumeCreditsFor(playFor(index,plays),perf)
-
+            //var thisAmount = amount(perf,playFor(index,plays))
             // print line for this order
-            result += "${playFor(index,plays).name()}: ${format((thisAmount/100).toDouble())} (${perf.audience} seats)\n"
-            totalAmount += thisAmount
+            result += "${playFor(index,plays).name()}: ${usd((amount(perf,playFor(index,plays))/100).toDouble())}" +
+                      " (${perf.audience} seats)\n"
+           totalAmount += amount(perf,playFor(index,plays))
         }
 
-        result += "Amount owed is ${format(totalAmount/100)}\n"
+        for ((index, perf)  in invoice.performances?.withIndex()!!) {
+            volumeCredits  = volumeCreditsFor(playFor(index,plays),perf)
+        }
+
+        result += "Amount owed is ${usd(totalAmount/100)}\n"
         result += "You earned ${volumeCredits} credits\n"
 
         return result
@@ -32,17 +33,17 @@ class PlayController {
 
     fun volumeCreditsFor( play: IPlay, perf: Performance):Double{
 
-        var volumeCredits = 0.0
+        var result = 0.0
         // add volume credits
-           volumeCredits += Math.max(perf.audience - 30, 0)
+        result += Math.max(perf.audience - 30, 0)
         // add extra credit for every ten comedy attendees
         if ("comedy" === play.type())
-            volumeCredits += Math.floor((perf.audience / 5).toDouble())
+            result += Math.floor((perf.audience / 5).toDouble())
 
-       return volumeCredits
+       return result
     }
 
-    fun format(amount: Double):String
+    fun usd(amount: Double):String
     {
         val locale =  Locale("en", "US")
         val currencyFormatter = NumberFormat.getCurrencyInstance (locale)
