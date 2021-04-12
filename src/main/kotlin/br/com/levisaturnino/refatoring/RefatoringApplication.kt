@@ -14,7 +14,6 @@ class RefatoringApplication : CommandLineRunner {
 		var playController = PlayController()
 		var invoice = Invoice()
 		invoice.customer =  "BigCo"
-		invoice.performances
 
 		print(playController.statement(invoice,Play.populate()))
 

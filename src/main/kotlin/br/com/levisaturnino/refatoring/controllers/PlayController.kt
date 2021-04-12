@@ -1,6 +1,7 @@
 package br.com.levisaturnino.refatoring.controllers
 import br.com.levisaturnino.refatoring.domain.IPlay
 import br.com.levisaturnino.refatoring.domain.Invoice
+import br.com.levisaturnino.refatoring.domain.Performance
 import java.text.NumberFormat
 import java.util.*
 
@@ -13,25 +14,8 @@ class PlayController {
 
         for ((index, perf)  in invoice.performances?.withIndex()!!) {
             val play = plays[index]
-            var thisAmount = 0
 
-            when (play.type()) {
-                "tragedy" -> {
-                    thisAmount = 40000
-                    if (perf.audience > 30) {
-                        thisAmount += 1000 * (perf.audience - 30)
-                    }
-                }
-                "comedy" -> {
-                    thisAmount = 30000
-                    if (perf.audience > 20) {
-                        thisAmount += 10000 + 500 * (perf.audience - 20)
-                    }
-                    thisAmount += 300 * perf.audience
-                }
-                else ->
-                    throw  Error ("unknown type: ${play.type()}")
-            }
+            var thisAmount = amount(perf,play)
 
             // add volume credits
             volumeCredits += Math.max(perf.audience - 30, 0)
@@ -55,5 +39,29 @@ class PlayController {
         val locale =  Locale("en", "US")
         val currencyFormatter = NumberFormat.getCurrencyInstance (locale)
         return currencyFormatter.format(amount)
+    }
+
+    fun amount(perf:Performance, play: IPlay):Int{
+
+        var thisAmount = 0
+        when (play.type()) {
+            "tragedy" -> {
+                thisAmount = 40000
+                if (perf.audience > 30) {
+                    thisAmount += 1000 * (perf.audience - 30)
+                }
+            }
+            "comedy" -> {
+                thisAmount = 30000
+                if (perf.audience > 20) {
+                    thisAmount += 10000 + 500 * (perf.audience - 20)
+                }
+                thisAmount += 300 * perf.audience
+            }
+            else ->
+                throw  Error ("unknown type: ${play.type()}")
+        }
+
+        return thisAmount
     }
 }
