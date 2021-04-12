@@ -13,18 +13,18 @@ class PlayController {
         var result = "Statement for ${invoice.customer}\n"
 
         for ((index, perf)  in invoice.performances?.withIndex()!!) {
-            val play = playFor(index,plays)
+           // val play = playFor(index,plays)
 
-            var thisAmount = amount(perf,play)
+            var thisAmount = amount(perf,playFor(index,plays))
 
             // add volume credits
             volumeCredits += Math.max(perf.audience - 30, 0)
             // add extra credit for every ten comedy attendees
-            if ("comedy" === play.type())
+            if ("comedy" === playFor(index,plays).type())
                 volumeCredits += Math.floor((perf.audience / 5).toDouble())
 
             // print line for this order
-            result += "${play.name()}: ${format((thisAmount/100).toDouble())} (${perf.audience} seats)\n"
+            result += "${playFor(index,plays).name()}: ${format((thisAmount/100).toDouble())} (${perf.audience} seats)\n"
             totalAmount += thisAmount
         }
 
