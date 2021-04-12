@@ -17,11 +17,7 @@ class PlayController {
 
             var thisAmount = amount(perf,playFor(index,plays))
 
-            // add volume credits
-            volumeCredits += Math.max(perf.audience - 30, 0)
-            // add extra credit for every ten comedy attendees
-            if ("comedy" === playFor(index,plays).type())
-                volumeCredits += Math.floor((perf.audience / 5).toDouble())
+            volumeCredits  = volumeCreditsFor(playFor(index,plays),perf)
 
             // print line for this order
             result += "${playFor(index,plays).name()}: ${format((thisAmount/100).toDouble())} (${perf.audience} seats)\n"
@@ -32,6 +28,18 @@ class PlayController {
         result += "You earned ${volumeCredits} credits\n"
 
         return result
+    }
+
+    fun volumeCreditsFor( play: IPlay, perf: Performance):Double{
+
+        var volumeCredits = 0.0
+        // add volume credits
+           volumeCredits += Math.max(perf.audience - 30, 0)
+        // add extra credit for every ten comedy attendees
+        if ("comedy" === play.type())
+            volumeCredits += Math.floor((perf.audience / 5).toDouble())
+
+       return volumeCredits
     }
 
     fun format(amount: Double):String
