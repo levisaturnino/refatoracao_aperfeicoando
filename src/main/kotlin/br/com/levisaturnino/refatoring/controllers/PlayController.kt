@@ -1,7 +1,5 @@
 package br.com.levisaturnino.refatoring.controllers
-import br.com.levisaturnino.refatoring.domain.IPlay
-import br.com.levisaturnino.refatoring.domain.Invoice
-import br.com.levisaturnino.refatoring.domain.Performance
+import br.com.levisaturnino.refatoring.domain.*
 import java.text.NumberFormat
 import java.util.*
 
@@ -15,7 +13,7 @@ class PlayController {
     fun renderPlainText (invoice: Invoice, plays:List<IPlay>):String {
         var result = "Statement for ${invoice.customer}\n"
         for ((index, perf)  in invoice.performances?.withIndex()!!) {
-            result += "${playFor(index,plays).name()}: ${usd((amount(perf,playFor(index,plays))/100).toDouble())}" +
+            result += "${playFor(index,plays).name()}: ${usd((createPerformanceCalculator(perf,playFor(index,plays)).amount()/100).toDouble())}" +
                       " (${perf.audience} seats)\n"
         }
         result += "Amount owed is ${usd(totalAmount(invoice,plays)/100)}\n"
@@ -23,28 +21,43 @@ class PlayController {
         return result
     }
 
+    fun createPerformanceCalculator( perf:Performance, play: IPlay):PerformanceCalculator{
+        when (play.type()) {
+            "tragedy" -> {
+                return TragedyCalculator(perf,play)
+            }
+            "comedy" -> {
+                return ComedyCalculator(perf,play)
+            }
+            else ->
+                throw  Error ("unknown type: ${play.type()}")
+        }
+    }
+
     fun totalAmount(invoice: Invoice,plays: List<IPlay>):Double{
         var result = 0.0
         for ((index, perf)  in invoice.performances?.withIndex()!!) {
-            result += amount(perf,playFor(index,plays))
+            result += createPerformanceCalculator(perf,playFor(index,plays)).amount() // amount(perf,playFor(index,plays))
         }
+
        return result
     }
 
     fun totalVolumeCredits(invoice: Invoice,plays: List<IPlay>):Double{
         var result = 0.0
         for ((index, perf)  in invoice.performances?.withIndex()!!) {
-            result  = volumeCreditsFor(playFor(index,plays),perf)
+            result  = createPerformanceCalculator(perf,playFor(index,plays)).volumeCredits()
         }
        return result
     }
-    fun volumeCreditsFor( play: IPlay, perf: Performance):Double{
+
+    /*fun volumeCreditsFor( play: IPlay, perf: Performance):Double{
         var result = 0.0
         result += Math.max(perf.audience - 30, 0)
         if ("comedy" === play.type())
             result += Math.floor((perf.audience / 5).toDouble())
        return result
-    }
+    }*/
 
     fun usd(amount: Double):String
     {
@@ -57,25 +70,18 @@ class PlayController {
         return plays[index]
     }
 
-    fun amount(perf:Performance, play: IPlay):Int{
+/*    fun amount(perf:Performance, play: IPlay):Int{
         var result  = 0
         when (play.type()) {
             "tragedy" -> {
-                result = 40000
-                if (perf.audience > 30) {
-                    result += 1000 * (perf.audience - 30)
-                }
+                return TragedyCalculator(perf,play).amount()
             }
             "comedy" -> {
-                result = 30000
-                if (perf.audience > 20) {
-                    result += 10000 + 500 * (perf.audience - 20)
-                }
-                result += 300 * perf.audience
+                return ComedyCalculator(perf,play).amount()
             }
             else ->
                 throw  Error ("unknown type: ${play.type()}")
         }
         return result
-    }
+    }*/
 }
