@@ -7,43 +7,42 @@ import java.util.*
 
 class PlayController {
 
-    fun statement (invoice: Invoice, plays:List<IPlay>):String {
-        var totalAmount = 0.0
-        var result = "Statement for ${invoice.customer}\n"
+    fun statement(invoice: Invoice, plays:List<IPlay>):String {
 
+        return renderPlainText(invoice,plays)
+    }
+
+    fun renderPlainText (invoice: Invoice, plays:List<IPlay>):String {
+        var result = "Statement for ${invoice.customer}\n"
         for ((index, perf)  in invoice.performances?.withIndex()!!) {
-           // val play = playFor(index,plays)
-            //var thisAmount = amount(perf,playFor(index,plays))
-            // print line for this order
             result += "${playFor(index,plays).name()}: ${usd((amount(perf,playFor(index,plays))/100).toDouble())}" +
                       " (${perf.audience} seats)\n"
-           totalAmount += amount(perf,playFor(index,plays))
         }
-
-       // var volumeCredits = totalVolumeCredits(invoice,plays)
-
-        result += "Amount owed is ${usd(totalAmount/100)}\n"
+        result += "Amount owed is ${usd(totalAmount(invoice,plays)/100)}\n"
         result += "You earned ${totalVolumeCredits(invoice,plays)} credits\n"
-
         return result
     }
 
-    fun totalVolumeCredits(invoice: Invoice,plays: List<IPlay>):Double{
-        var volumeCredits = 0.0
+    fun totalAmount(invoice: Invoice,plays: List<IPlay>):Double{
+        var result = 0.0
         for ((index, perf)  in invoice.performances?.withIndex()!!) {
-            volumeCredits  = volumeCreditsFor(playFor(index,plays),perf)
+            result += amount(perf,playFor(index,plays))
         }
-       return volumeCredits
+       return result
+    }
+
+    fun totalVolumeCredits(invoice: Invoice,plays: List<IPlay>):Double{
+        var result = 0.0
+        for ((index, perf)  in invoice.performances?.withIndex()!!) {
+            result  = volumeCreditsFor(playFor(index,plays),perf)
+        }
+       return result
     }
     fun volumeCreditsFor( play: IPlay, perf: Performance):Double{
-
         var result = 0.0
-        // add volume credits
         result += Math.max(perf.audience - 30, 0)
-        // add extra credit for every ten comedy attendees
         if ("comedy" === play.type())
             result += Math.floor((perf.audience / 5).toDouble())
-
        return result
     }
 
@@ -59,9 +58,7 @@ class PlayController {
     }
 
     fun amount(perf:Performance, play: IPlay):Int{
-
         var result  = 0
-
         when (play.type()) {
             "tragedy" -> {
                 result = 40000
